@@ -23,7 +23,19 @@ let startUrl = `v1/data?
     %22cumCasesBySpecimenDate%22:%22cumCasesBySpecimenDate%22,
     %22newCasesBySpecimenDate%22:%22newCasesBySpecimenDate%22,
     %22cumDeaths28DaysByPublishDate%22:%22cumDeaths28DaysByPublishDate%22,
-    %22newDeaths28DaysByPublishDate%22:%22newDeaths28DaysByPublishDate%22
+    %22newDeaths28DaysByPublishDate%22:%22newDeaths28DaysByPublishDate%22,
+    %22newCasesBySpecimenDateAgeDemographics%22:%22newCasesBySpecimenDateAgeDemographics%22
     %7D&format=json`
 
 loadData(startUrl)
+
+//
+let test_call = 
+`https://coronavirus.data.gov.uk/api/v1/data?
+filters=areaType=utla;areaName=Bath%2520and%2520North%2520East%2520Somerset&structure=
+%7B%22areaType%22:%22areaType%22,
+%22areaName%22:%22areaName%22,
+%22areaCode%22:%22areaCode%22,
+%22date%22:%22date%22,
+%22newCasesBySpecimenDateAgeDemographics%22:%22newCasesBySpecimenDateAgeDemographics%22
+%7D&format=json`

@@ -28,6 +28,14 @@ let svg2 = d3.select('#vis2')
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+let svg3 = d3.select('#vis3')
+    .append('svg')
+    .attr('height', svgHeight)
+    .attr('width', svgWidth)
+    .append('g')
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
 // Define the div for the tooltip
 var div = d3.select("body").append("div")	
     .attr("class", "tooltip")				
@@ -74,19 +82,20 @@ function run(data){
         let summed = histogram(temp)
         let newObj = summed.map(d => {
             return {
-                areaName:x, 
-                startDate:d.x0, 
-                endDate:d.x1, 
-                newCasesBySpecimenDate:d3.sum(d, j => j.newCasesBySpecimenDate), 
-                cumCasesBySpecimenDate:d3.max(d, j => j.cumCasesBySpecimenDate), 
-                newDeaths28DaysByPublishDate:d3.sum(d, j => j.newDeaths28DaysByPublishDate),
-                cumDeaths28DaysByPublishDate:d3.max(d, j => j.cumDeaths28DaysByPublishDate) 
+                areaName: x, 
+                startDate: d.x0, 
+                endDate: d.x1, 
+                newCasesBySpecimenDate: d3.sum(d, j => j.newCasesBySpecimenDate), 
+                cumCasesBySpecimenDate: d3.max(d, j => j.cumCasesBySpecimenDate), 
+                newDeaths28DaysByPublishDate: d3.sum(d, j => j.newDeaths28DaysByPublishDate),
+                cumDeaths28DaysByPublishDate: d3.max(d, j => j.cumDeaths28DaysByPublishDate),
             }
         })
         sumData = sumData.concat(newObj)
     }
 
     bump(sumData)
+    area(data)
 
     let colorScale = d3.scaleSequential()
         .domain(d3.extent(sumData, d => d[colorSelection]))
@@ -293,6 +302,110 @@ function bump(data){
         .attr("transform", `translate(${width},0)`)
         .call(d3.axisRight(RankScale.domain(right)))
     
+}
+
+function area(data){
+
+    let xScale = d3.scaleTime()
+    .domain(d3.extent(data, d => d.date))
+    .range([0,width])
+
+    // let yScale = d3.scaleBand()
+    //     .domain(d3.map(data, d => d.areaName))
+    //     .range([height,0])
+    //     .paddingInner(0.01)
+    //     .paddingOuter(0.01)
+
+    let yScale = d3.scaleLinear()
+        .range([height,0])
+        .domain([0,4000])
+
+    data = data.filter(d => d.areaName == 'South West')
+
+    let flat = []
+
+    let keys = ['00_04','05_09','10_14','15_19','20_24','25_29','30_34','35_39','40_44','45_49','50_54','55_59','60+','60_64','65_69','70_74','75_79','80_84','85_89','90+']
+
+    for (let d of data){
+        let entry = {}
+        entry.date = d.date
+        for (let key in keys){
+            entry[keys[key]] = d.newCasesBySpecimenDateAgeDemographics[key] ? d.newCasesBySpecimenDateAgeDemographics[key].rollingRate : 0
+        }
+        flat.push(entry)
+    }
+
+    console.log(flat)
+
+    let colorScale = d3.scaleBand()
+        .domain(keys)
+        .range([0,1])
+
+    // let series = d3.stack()
+    //     .keys(keys)
+    //     .offset(d3.stackOffsetExpand)
+    //     (flat)
+
+    let series = d3.stack()
+        .keys(keys)
+        .value(function(d, key){
+            return d[key]
+        })
+        (flat)
+
+    let area = d3.area()
+        .x(d => xScale(new Date(d.data.date)))
+        .y0(d => yScale(d[0]))
+        .y1(d => yScale(d[1]))
+        .curve(d3.curveBasis)
+
+    let ageArea = svg3.append("g")
+        .selectAll("path")
+        .data(series)
+        .join("path")
+          .attr("fill", ({key}) => d3.interpolateViridis(colorScale(key)))
+          .attr('stroke', 'white')
+          .attr("stroke-dasharray", "2")
+          .attr("d", area)
+          .on("mouseover", function(event, d){
+
+            const e = ageArea.nodes();
+            const i = e.indexOf(this);
+
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div.html('Date: ' + d[i].data.date + '<br>Age Rage: ' + d.key  + '<br>Rolling Rate: ' + d[i].data[d.key])	
+                .style("left", (event.pageX) + "px")		
+                .style("top", (event.pageY - 28) + "px");
+        })
+        .on("mouseout", function(){
+            div.transition()		
+                .duration(500)		
+                .style("opacity", 0);
+        })
+
+    svg3.append("g")
+          .attr("transform", `translate(0,${height})`)
+          .attr("id", "x-axis-3")
+  
+    svg3.append("g")
+        .attr("id", "y-axis-4")
+
+          
+    d3.select('#x-axis-3')
+        .transition()
+        .call(d3.axisBottom(xScale))
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
+
+    d3.select('#y-axis-4')
+        .call(d3.axisLeft(yScale))
+
 }
 
 
