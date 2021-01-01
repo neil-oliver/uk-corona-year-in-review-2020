@@ -13,18 +13,42 @@
                 padding: 10px;
                 font: 12px sans-serif;
                 background: white;
-                border: 0px;
-                border-radius: 8px;
+                border: 1px;
+                border-radius: 3px;
                 pointer-events: none;
+                border-style: solid;
+            }
+            rect, path {
+                transition: all ease-in-out 0.5s;
+            }
+            #dropdown-container{
+                padding: 20px 0 0 100px;
+                text-align: left;
+            }
+            select {
+                padding:10px;
+            }
+            #vis-container{
+                text-align: center;
             }
         </style>
     </head>
     <body> 
-        <div id="vis"></div>
-        <div id="vis2"></div>   
-        <div id="vis3"></div>           
+        <div id="vis-container">
+            <div id="dropdown-container"></div>           
+            <div id="areachart"></div>           
+            <div id="heatmap"></div>
+            <div id="bumpchart"></div>   
+        </div>
     </body>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="js/globals.js"></script>
+    <script src="js/labels.js"></script>
+    <script src="js/color-legend.js"></script>
+    <script src="js/area.js"></script>
+    <script src="js/heatmap.js"></script>
+    <!-- <script src="js/bump.js"></script> -->
     <script src="js/script.js"></script>
-    <!-- <script src="js/get_data.js"></script> -->
 
+    <!-- <script src="js/get_data.js"></script> -->
+</html>
