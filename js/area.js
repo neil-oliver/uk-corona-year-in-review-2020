@@ -58,23 +58,21 @@ function areaUpdate(data, xScale){
     labels(areachart, xScale, 'grey')
 
     areachart.append("g")
-    .attr("id", "areachart-y-axis")
+        .attr("id", "areachart-y-axis")
 
     let yAxis = d3.axisLeft(yScale)
 
     d3.select('#areachart-y-axis')
         .call(yAxis)
 
-    // add the Y gridlines
     areachart.append("g")			
-        .attr("class", "areachart-grid")
+        .attr("id", "areachart-grid")
         .attr("color", "grey")
         .attr("opacity", 0.1)
         .call(yAxis
             .tickSize(-width)
             .tickFormat("")
         )
-        .lower()
 
     areachart.append("g")
         .attr("transform", `translate(0,${height})`)
