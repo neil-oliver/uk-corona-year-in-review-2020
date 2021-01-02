@@ -5,7 +5,7 @@ let areachart = d3.select('#areachart')
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
-function areaUpdate(data, xScale){
+function areaUpdate(data, xScale, initial=false){
 
     let values = d3.group(data, d => d.startDate, d => d.areaName)
 
@@ -39,9 +39,9 @@ function areaUpdate(data, xScale){
         .attr("width", width)
         .attr("fill", "rgb(0,0,0,0)")
         .on("click", function(event, d){
-            console.log('reset')
             areaSelection = areas
             areaUpdate(wrangledData, xScale)
+            heatmapUpdate(wrangledData, xScale)
         })
 
     let ageArea = areachart
@@ -53,6 +53,16 @@ function areaUpdate(data, xScale){
             .attr("stroke-dasharray", "2")
             .attr("d", area)
             .on("mouseover", function(event, d){
+                areaSelection = [d.key]
+                heatmapUpdate(wrangledData, xScale)
+
+                areachart
+                    .selectAll("path")
+                    .data(series)
+                    .join("path")
+                    .attr("fill-opacity", 0.8)
+
+                d3.select(this).attr("fill-opacity", 1)
 
                 const e = ageArea.nodes();
                 const i = e.indexOf(this);
@@ -65,45 +75,57 @@ function areaUpdate(data, xScale){
                     .style("top", (event.pageY - 28) + "px");
             })
             .on("mouseout", function(){
+
+                areaSelection = areas
+                heatmapUpdate(wrangledData, xScale)
+
+                areachart
+                    .selectAll("path")
+                    .data(series)
+                    .join("path")
+                    .attr("fill-opacity", 1)
+
                 tooltip.transition()		
                     .duration(500)		
                     .style("opacity", 0);
             })
             .on ("click", function(event, d) {
-                console.log('selection')
                 areaSelection = [d.key]
-                console.log(areaSelection)
                 areaUpdate(wrangledData, xScale)
             })
 
-    labels(areachart, xScale, 'grey')
+    if (initial == true){
 
-    areachart.append("g")
-        .attr("id", "areachart-y-axis")
+        labels(areachart, xScale, 'grey')
 
-    let yAxis = d3.axisLeft(yScale)
+        areachart.append("g")
+            .attr("id", "areachart-y-axis")
 
-    d3.select('#areachart-y-axis')
-        .call(yAxis)
+        let yAxis = d3.axisLeft(yScale)
 
-    areachart.append("g")			
-        .attr("id", "areachart-grid")
-        .attr("color", "grey")
-        .attr("opacity", 0.1)
-        .call(yAxis
-            .tickSize(-width)
+        d3.select('#areachart-y-axis')
+            .call(yAxis)
+
+        areachart.append("g")			
+            .attr("id", "areachart-grid")
+            .attr("color", "grey")
+            .attr("opacity", 0.1)
+            .call(yAxis
+                .tickSize(-width)
+                .tickFormat("")
+            )
+
+        areachart.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .attr("id", "areachart-x-axis")
+
+        let xAxis = d3.axisBottom(xScale)
             .tickFormat("")
-        )
+            .ticks(sumBy)
 
-    areachart.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .attr("id", "areachart-x-axis")
+        d3.select('#areachart-x-axis')
+            .call(xAxis)
 
-    let xAxis = d3.axisBottom(xScale)
-        .tickFormat("")
-        .ticks(sumBy)
-
-    d3.select('#areachart-x-axis')
-        .call(xAxis)
+    }
 
 }

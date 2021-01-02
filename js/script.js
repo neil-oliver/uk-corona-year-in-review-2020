@@ -56,8 +56,8 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
     console.log(data)
     console.log(wrangledData)
 
-    areaUpdate(wrangledData, xScale)
-    heatmapUpdate(wrangledData, xScale)
+    areaUpdate(wrangledData, xScale, true)
+    heatmapUpdate(wrangledData, xScale, true)
     // bumpUpdate(wrangledData, xScale)
 
 })

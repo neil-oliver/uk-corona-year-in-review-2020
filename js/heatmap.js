@@ -27,6 +27,7 @@ function heatmapUpdate(data, xScale){
         .attr('x', d => xScale(d.startDate))
         .attr('width', d => xScale(d.endDate) - xScale(d.startDate))
         .attr("fill", d => colorScale(d[selection]))
+        .attr('fill-opacity', d => areaSelection.includes(d.areaName) ? 1 : 0.9)
         .on("mouseover", function(event, d){
             tooltip.transition()		
                 .duration(200)		
