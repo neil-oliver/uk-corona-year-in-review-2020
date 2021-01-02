@@ -11,7 +11,7 @@ function heatmapUpdate(data, xScale){
     // scales
     let yScale = d3.scaleBand()
         .domain(d3.map(data, d => d.areaName))
-        .range([height,0])
+        .range([height*0.5,0])
         .paddingInner(0.01)
         .paddingOuter(0.01)
 
@@ -55,7 +55,7 @@ function heatmapUpdate(data, xScale){
 
     //add svg group to append axis
     heatmap.append("g")
-        .attr("transform", `translate(0,${height})`)
+        .attr("transform", `translate(0,${height*0.5})`)
         .attr("id", "x-axis")
 
     heatmap.append("g")
