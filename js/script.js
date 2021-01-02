@@ -34,6 +34,7 @@ let xScale = d3.scaleTime()
 let data = []
 let wrangledData = []
 let areas = []
+let areaSelection = []
 
 d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 
@@ -46,6 +47,7 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
     data = data.filter(d => d.areaName != undefined)
 
     areas = [...new Set(data.map(d => d.areaName))]
+    areaSelection = areas
 
     xScale.domain(d3.extent(data, d => d.date))
 
@@ -61,7 +63,7 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 })
 
 // Handler for dropdown value change
-var dropdownChange = function() {
+var metricDropdownChange = function() {
     selection = d3.select(this).property('value'),
 
     areaUpdate(wrangledData, xScale)
@@ -69,11 +71,11 @@ var dropdownChange = function() {
     // bumpUpdate(wrangledData, xScale)
 };
 
-var dropdown = d3.select("#dropdown-container")
+var metricDropdown = d3.select("#metric-dropdown-container")
     .insert("select", "svg")
-    .on("change", dropdownChange);
+    .on("change", metricDropdownChange);
 
-dropdown.selectAll("option")
+metricDropdown.selectAll("option")
     .data(Object.keys(metrics))
     .enter().append("option")
     .attr("value", function (d) { return d; })
