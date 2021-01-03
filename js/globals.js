@@ -13,7 +13,7 @@ let margin = {
 let height = svgHeight - margin.top - margin.bottom
 let width = svgWidth - margin.left - margin.right
 
-let sumBy = d3.timeWeek
+let sumBy = d3.utcWeek
 
 var dateOutputFormat = d3.timeFormat("%d %B %Y");
 

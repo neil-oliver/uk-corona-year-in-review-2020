@@ -28,7 +28,7 @@ function wrangleData(data, xScale) {
     return sumData
 }
 
-let xScale = d3.scaleTime()
+let xScale = d3.scaleUtc()
     .range([0, width])
 
 let data = []

@@ -8,6 +8,7 @@ let areachart = d3.select('#areachart')
 function areaUpdate(data, xScale, initial=false){
 
     let values = d3.group(data, d => d.startDate, d => d.areaName)
+    let objValues = Object.fromEntries(values)
 
     let yScale = d3.scaleLinear()
         .range([height,0])
@@ -56,6 +57,8 @@ function areaUpdate(data, xScale, initial=false){
                 areaSelection = [d.key]
                 heatmapUpdate(wrangledData, xScale)
 
+                let hoverDate = sumBy.round(xScale.invert(event.layerX - margin.left))
+
                 areachart
                     .selectAll("path")
                     .data(series)
@@ -70,7 +73,7 @@ function areaUpdate(data, xScale, initial=false){
                 tooltip.transition()		
                     .duration(200)		
                     .style("opacity", .9);		
-                tooltip.html('Date: <strong>' + dateOutputFormat(d[i].data[0]) + '</strong><br>Area: <strong>' + d.key  + `</strong><br>${metrics[selection]}: <strong>` + d[i].data[1].get(d.key)[0][selection].toLocaleString() + '</strong>')	
+                tooltip.html('Date: <strong>' + dateOutputFormat(hoverDate) + '</strong><br>Area: <strong>' + d.key  + `</strong><br>${metrics[selection]}: <strong>` + objValues[hoverDate].get(d.key)[0][selection].toLocaleString() + '</strong>')	
                     .style("left", (event.pageX) + "px")		
                     .style("top", (event.pageY - 28) + "px");
             })
