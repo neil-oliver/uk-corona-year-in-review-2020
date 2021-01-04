@@ -41,6 +41,12 @@ function areaUpdate(data, xScale, initial=false){
         .attr("fill", "rgb(0,0,0,0)")
         .on("click", function(event, d){
             areaSelection = areas
+
+            areaSelect.selectAll("input")
+                .data(areas)
+                .join("input")
+                .attr("checked", d => areaSelection.includes(d) ? true : false)
+
             areaUpdate(wrangledData, xScale)
             heatmapUpdate(wrangledData, xScale)
         })
@@ -94,6 +100,12 @@ function areaUpdate(data, xScale, initial=false){
             })
             .on ("click", function(event, d) {
                 areaSelection = [d.key]
+
+                areaSelect.selectAll("input")
+                    .data(areas)
+                    .join("input")
+                    .attr("checked", d => areaSelection.includes(d) ? true : false)
+
                 areaUpdate(wrangledData, xScale)
             })
 

@@ -1,24 +1,25 @@
 function legend({
+    svg,
     color,
     title,
     tickSize = 6,
-    width = 320,
-    height = 254 + tickSize,
-    marginTop = 218,
+    width = 1600,
+    height = 300 + tickSize,
+    marginTop = 260,
     marginRight = 0,
     marginBottom = 16 + tickSize,
-    marginLeft = 120,
-    ticks = width / 64,
+    marginLeft = 1320,
+    ticks = 10,
     tickFormat,
     tickValues
   } = {}) {
-    const svg = d3.select("svg")
+    // const svg = d3.select("svg")
       // .attr("width", width)
       // .attr("height", height)
       // .attr("viewBox", [0, 0, width, height])
       // .style("overflow", "visible")
       // .style("display", "block");
-  
+
     let tickAdjust = g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height);
     let x;
   

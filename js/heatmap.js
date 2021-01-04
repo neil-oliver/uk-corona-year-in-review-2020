@@ -6,7 +6,7 @@ let heatmap = d3.select('#heatmap')
     .attr("transform", "translate(" + margin.left + "," + 5 + ")");
 
 // load in data
-function heatmapUpdate(data, xScale){
+function heatmapUpdate(data, xScale, initial=false){
 
     // scales
     let yScale = d3.scaleBand()
@@ -48,32 +48,36 @@ function heatmapUpdate(data, xScale){
     //     color: d3.scaleOrdinal(["blueberries", "oranges", "apples"], d3.schemeCategory10)
     // })
 
-    // legend({
-    //     color: d3.scaleSequential(d3.extent(data, d => d[selection]), d3.interpolateViridis),
-    //     title: "Covid Cases"
-    // })
+    if(initial == true){
+        console.log('updating')
+        legend({
+            svg: heatmap,
+            color: d3.scaleSequential(d3.extent(data, d => d[selection]), d3.interpolateViridis),
+            title: metrics[selection]
+        })
 
-    //add svg group to append axis
-    heatmap.append("g")
-        .attr("transform", `translate(0,${height*0.5})`)
-        .attr("id", "x-axis")
+        //add svg group to append axis
+        heatmap.append("g")
+            .attr("transform", `translate(0,${height*0.5})`)
+            .attr("id", "x-axis")
 
-    heatmap.append("g")
-        .attr("id", "y-axis")
+        heatmap.append("g")
+            .attr("id", "y-axis")
 
 
-    //append axis
-    d3.select('#x-axis')
-        .transition()
-        .call(d3.axisBottom(xScale).ticks(sumBy))
-        .selectAll("text")
-        .attr("y", 0)
-        .attr("x", 9)
-        .attr("dy", ".35em")
-        .attr("transform", "rotate(90)")
-        .style("text-anchor", "start");
+        //append axis
+        d3.select('#x-axis')
+            .transition()
+            .call(d3.axisBottom(xScale).ticks(sumBy))
+            .selectAll("text")
+            .attr("y", 0)
+            .attr("x", 9)
+            .attr("dy", ".35em")
+            .attr("transform", "rotate(90)")
+            .style("text-anchor", "start");
 
-    d3.select('#y-axis')
-        .call(d3.axisLeft(yScale))
+        d3.select('#y-axis')
+            .call(d3.axisLeft(yScale))
+    }
 
 };

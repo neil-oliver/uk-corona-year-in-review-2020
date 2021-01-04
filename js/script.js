@@ -49,6 +49,39 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
     areas = [...new Set(data.map(d => d.areaName))]
     areaSelection = areas
 
+    var areaSelectChange = function(event) {
+
+        var checkedValues = document.querySelectorAll('.areaCheckbox:checked');
+        let checkedAreas = []
+        checkedValues.forEach(d => {
+            checkedAreas.push(d.value)
+        });
+        areaSelection = checkedAreas
+
+        areaUpdate(wrangledData, xScale)
+        heatmapUpdate(wrangledData, xScale)
+    };
+
+    areaSelect = d3.select("#area-select-container")
+        .on("change", areaSelectChange);
+
+    let colorScale = d3.scaleBand()
+        .domain(areas)
+        .range([0,1])
+
+    areaSelect.selectAll("input")
+        .data(areas)
+        .enter()
+        .append('label')
+            .text(function(d) { return d; })
+            .style('color', d => d3.interpolateViridis(colorScale(d)))
+        .append("input")
+            .attr("checked", d => areaSelection.includes(d) ? true : false)
+            .attr("type", "checkbox")
+            .attr("value", d => d)
+            .attr("id", function(d,i) { return i; })
+            .attr("class", "areaCheckbox")
+
     xScale.domain(d3.extent(data, d => d.date))
 
     wrangledData = wrangleData(data, xScale)
@@ -58,7 +91,6 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 
     areaUpdate(wrangledData, xScale, true)
     heatmapUpdate(wrangledData, xScale, true)
-    // bumpUpdate(wrangledData, xScale)
 
 })
 
@@ -68,7 +100,6 @@ var metricDropdownChange = function() {
 
     areaUpdate(wrangledData, xScale)
     heatmapUpdate(wrangledData, xScale)
-    // bumpUpdate(wrangledData, xScale)
 };
 
 var metricDropdown = d3.select("#metric-dropdown-container")
