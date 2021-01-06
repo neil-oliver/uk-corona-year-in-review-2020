@@ -5,6 +5,14 @@ let heatmap = d3.select('#heatmap')
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + 5 + ")");
 
+//add svg group to append axis
+let heatmapXAxisGroup = heatmap.append("g")
+    .attr("transform", `translate(0,${height*0.5})`)
+    .attr("id", "x-axis")
+
+let heatmapYAxisGroup = heatmap.append("g")
+    .attr("id", "y-axis")
+
 // load in data
 function heatmapUpdate(data, xScale, initial=false){
 
@@ -12,8 +20,8 @@ function heatmapUpdate(data, xScale, initial=false){
     let yScale = d3.scaleBand()
         .domain(d3.map(data, d => d.areaName))
         .range([height*0.5,0])
-        .paddingInner(0.01)
-        .paddingOuter(0.01)
+        // .paddingInner(0.01)
+        // .paddingOuter(0.01)
 
     let colorScale = d3.scaleSequential()
         .domain(d3.extent(data, d => d[selection]))
@@ -44,40 +52,23 @@ function heatmapUpdate(data, xScale, initial=false){
 
     labels(heatmap, xScale, 'white', false)
 
-    // swatches({
-    //     color: d3.scaleOrdinal(["blueberries", "oranges", "apples"], d3.schemeCategory10)
+    // legend({
+    //     svg: heatmap,
+    //     color: d3.scaleSequential(d3.extent(data, d => d[selection]), d3.interpolateViridis),
+    //     title: metrics[selection]
     // })
 
-    if(initial == true){
-        console.log('updating')
-        legend({
-            svg: heatmap,
-            color: d3.scaleSequential(d3.extent(data, d => d[selection]), d3.interpolateViridis),
-            title: metrics[selection]
-        })
+    //append axis
+    heatmapXAxisGroup
+        .call(d3.axisBottom(xScale).ticks(sumBy))
+        .selectAll("text")
+        .attr("y", 0)
+        .attr("x", 9)
+        .attr("dy", ".35em")
+        .attr("transform", "rotate(90)")
+        .style("text-anchor", "start");
 
-        //add svg group to append axis
-        heatmap.append("g")
-            .attr("transform", `translate(0,${height*0.5})`)
-            .attr("id", "x-axis")
-
-        heatmap.append("g")
-            .attr("id", "y-axis")
-
-
-        //append axis
-        d3.select('#x-axis')
-            .transition()
-            .call(d3.axisBottom(xScale).ticks(sumBy))
-            .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 9)
-            .attr("dy", ".35em")
-            .attr("transform", "rotate(90)")
-            .style("text-anchor", "start");
-
-        d3.select('#y-axis')
-            .call(d3.axisLeft(yScale))
-    }
+    heatmapYAxisGroup
+        .call(d3.axisLeft(yScale))
 
 };

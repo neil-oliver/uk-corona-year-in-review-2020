@@ -1,6 +1,8 @@
 //global variables
-let svgWidth = 1800
-let svgHeight = svgWidth * 0.4
+let svgWidth = parseInt(d3.select('#vis-container').style('width'), 10)
+
+// let svgWidth = 1800
+let svgHeight = 800
 
 let margin = {
     left:100,
@@ -13,7 +15,15 @@ let margin = {
 let height = svgHeight - margin.top - margin.bottom
 let width = svgWidth - margin.left - margin.right
 
+let sumByLookup = {
+    'Week' : d3.utcWeek,
+    'Day' : d3.utcDay,
+    'Month' : d3.utcMonth
+}
+
 let sumBy = d3.utcWeek
+let sumByKey = 'week'
+
 
 var dateOutputFormat = d3.timeFormat("%d %B %Y");
 

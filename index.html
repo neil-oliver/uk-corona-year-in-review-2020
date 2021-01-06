@@ -22,8 +22,11 @@
                 pointer-events: none;
                 border-style: solid;
             }
-            rect, path {
-                transition: all ease-in-out 0.5s;
+            line, path {
+                transition: all 0.5s ease-in-out;
+            }
+            rect {
+                transition: fill 0.5s ease-in-out;
             }
             #dropdown-container{
                 padding: 20px 0 0 100px;
@@ -34,20 +37,31 @@
             }
             #vis-container{
                 text-align: center;
+                width:100%;
             }
         </style>
     </head>
     <body> 
         <div id="vis-container">
             <h1>England 2020 Covid Data Review</h1>
-            <div id="area-select-container"></div>           
-            <div id="metric-dropdown-container"></div>           
+            <div>
+                </span style="margin:20px"> 
+                    Metric: 
+                    <span id="metric-dropdown-container"></span>
+                </span> 
+                <span style="margin:20px">
+                    Summarise By:                 
+                    <span id="period-dropdown-container"></span>
+                </span> 
+            </div>
+            <div style="margin-top:20px" id="area-select-container"></div>             
             <div id="areachart"></div>           
             <div id="heatmap"></div>
             <div id="bumpchart"></div>   
         </div>
     </body>
     <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
     <script src="js/color-legend.js"></script>
     <script src="js/globals.js"></script>
     <script src="js/labels.js"></script>

@@ -113,3 +113,42 @@ metricDropdown.selectAll("option")
     .text(function (d) {
         return metrics[d]
     });
+
+var periodDropdownChange = function() {
+    sumByKey = d3.select(this).property('value')
+    sumBy = sumByLookup[sumByKey]
+    console.log('updating sum by to ' + sumBy)
+
+    wrangledData = wrangleData(data, xScale)
+    areaUpdate(wrangledData, xScale)
+    heatmapUpdate(wrangledData, xScale)
+};
+
+var periodDropdown = d3.select("#period-dropdown-container")
+    .insert("select", "svg")
+    .on("change", periodDropdownChange);
+
+periodDropdown.selectAll("option")
+    .data(Object.keys(sumByLookup))
+    .enter().append("option")
+    .attr("value", function (d) { return d; })
+    .text(function (d) {
+        return d.charAt(0).toUpperCase() + d.slice(1)
+    });
+
+window.addEventListener('resize', _.debounce(resize));
+
+function resize(){
+    console.log('resizing')
+    svgWidth = parseInt(d3.select('#vis-container').style('width'), 10)
+    d3.selectAll('svg').attr("width", svgWidth)
+
+    width = svgWidth - margin.left - margin.right
+
+    xScale.range([0, width])
+
+    areaUpdate(wrangledData, xScale)
+    heatmapUpdate(wrangledData, xScale)
+}
+
+

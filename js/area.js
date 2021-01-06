@@ -5,6 +5,19 @@ let areachart = d3.select('#areachart')
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
+let mouseEventGroup = areachart.append("g")
+
+let ageAreagroup = areachart.append("g")
+
+let labelsGroup = areachart.append("g")
+
+let areaYAxisGroup = areachart.append("g")
+    .attr("id", "areachart-y-axis")
+
+let areaXAxisGroup = areachart.append("g")
+    .attr("transform", `translate(0,${height})`)
+    .attr("id", "areachart-x-axis")
+
 function areaUpdate(data, xScale, initial=false){
 
     let values = d3.group(data, d => d.startDate, d => d.areaName)
@@ -30,7 +43,7 @@ function areaUpdate(data, xScale, initial=false){
         .y1(d => yScale(d[1]))
         .curve(d3.curveBasis)
 
-    let mouseEventRect = areachart
+    let mouseEventRect = mouseEventGroup
         .selectAll("rect")
         .data([1])
         .join("rect")
@@ -51,14 +64,14 @@ function areaUpdate(data, xScale, initial=false){
             heatmapUpdate(wrangledData, xScale)
         })
 
-    let ageArea = areachart
-        .selectAll("path")
+    let ageArea = ageAreagroup
+        .selectAll(".areapath")
         .data(series)
         .join("path")
             .attr("fill", ({key}) => d3.interpolateViridis(colorScale(key)))
             .attr('stroke', 'white')
             .attr("stroke-dasharray", "2")
-            .attr("d", area)
+            .attr("class", "areapath")
             .on("mouseover", function(event, d){
                 areaSelection = [d.key]
                 heatmapUpdate(wrangledData, xScale)
@@ -79,7 +92,7 @@ function areaUpdate(data, xScale, initial=false){
                 tooltip.transition()		
                     .duration(200)		
                     .style("opacity", .9);		
-                tooltip.html('Date: <strong>' + dateOutputFormat(hoverDate) + '</strong><br>Area: <strong>' + d.key  + `</strong><br>${metrics[selection]}: <strong>` + objValues[hoverDate].get(d.key)[0][selection].toLocaleString() + '</strong>')	
+                tooltip.html('Date: <strong>' + dateOutputFormat(hoverDate) + '</strong><br>Area: <strong>' + d.key  + `</strong><br>${metrics[selection]} ${selection != 'newDeaths28DaysByPublishDate' && selection != 'cumDeaths28DaysByPublishDate' ? `(Per ${sumByKey})` : ``}: <strong>` + objValues[hoverDate].get(d.key)[0][selection].toLocaleString() + '</strong>')	
                     .style("left", (event.pageX) + "px")		
                     .style("top", (event.pageY - 28) + "px");
             })
@@ -108,39 +121,26 @@ function areaUpdate(data, xScale, initial=false){
 
                 areaUpdate(wrangledData, xScale)
             })
+            .attr("d", area)
 
-    if (initial == true){
 
-        labels(areachart, xScale, 'grey')
+    labels(labelsGroup, xScale, 'grey')
 
-        areachart.append("g")
-            .attr("id", "areachart-y-axis")
+    areaYAxisGroup.call(d3.axisLeft(yScale))
 
-        let yAxis = d3.axisLeft(yScale)
+    // areachart.append("g")			
+    //     .attr("id", "areachart-grid")
+    //     .attr("color", "grey")
+    //     .attr("opacity", 0.1)
+    //     .call(yAxis
+    //         .tickSize(-width)
+    //         .tickFormat("")
+    //     )
 
-        d3.select('#areachart-y-axis')
-            .call(yAxis)
-
-        areachart.append("g")			
-            .attr("id", "areachart-grid")
-            .attr("color", "grey")
-            .attr("opacity", 0.1)
-            .call(yAxis
-                .tickSize(-width)
-                .tickFormat("")
-            )
-
-        areachart.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .attr("id", "areachart-x-axis")
-
-        let xAxis = d3.axisBottom(xScale)
+    areaXAxisGroup.call(
+        d3.axisBottom(xScale)
             .tickFormat("")
             .ticks(sumBy)
-
-        d3.select('#areachart-x-axis')
-            .call(xAxis)
-
-    }
+    )
 
 }

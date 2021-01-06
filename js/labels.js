@@ -1,4 +1,4 @@
-function labels(vis, xScale, lineColor='white', labels=true){
+function labels(group, xScale, lineColor='white', labels=true){
 
     let markers_data = [
         {label:'National Lockdown', date:'03/23/2020', desc:'All non-essential businesses & education closed for in person work.'},
@@ -13,7 +13,7 @@ function labels(vis, xScale, lineColor='white', labels=true){
         {label:'Tier Update', date:'12/26/2020', desc:'4 Tier System'},
     ]
 
-    vis.selectAll('line')
+    group.selectAll('.dashline')
         .data(markers_data)
         .join('line')
         .attr('y1', 0)
@@ -22,9 +22,10 @@ function labels(vis, xScale, lineColor='white', labels=true){
         .attr('x2', d => xScale(new Date(d.date)))
         .attr("stroke-dasharray", "4")
         .attr("stroke", lineColor)
+        .attr("class", "dashline")
 
     if (labels){
-        vis.selectAll('text')
+        group.selectAll('text')
             .data(markers_data)
             .join('text')
             .text(d => 'ⓘ ' + d.label)
