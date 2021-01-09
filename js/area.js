@@ -7,7 +7,9 @@ let areachart = d3.select('#areachart')
 
 let mouseEventGroup = areachart.append("g")
 
-let ageAreagroup = areachart.append("g")
+let ageAreaGroup = areachart.append("g")
+
+let highPointGroup = areachart.append("g")
 
 let labelsGroup = areachart.append("g")
 
@@ -23,9 +25,11 @@ function areaUpdate(data, xScale, initial=false){
     let values = d3.group(data, d => d.startDate, d => d.areaName)
     let objValues = Object.fromEntries(values)
 
+    let yMax = d3.max(Array.from(values).map(d => d3.sum(Array.from(d[1]), j => j[1][0][selection])))
+    let yExtent = [0, yMax*1.1] // give headspace
     let yScale = d3.scaleLinear()
         .range([height,0])
-        .domain(d3.extent(Array.from(values).map(d => d3.sum(Array.from(d[1]), j => j[1][0][selection]))))
+        .domain(yExtent)
 
     let colorScale = d3.scaleBand()
         .domain(areas)
@@ -41,7 +45,7 @@ function areaUpdate(data, xScale, initial=false){
         .x(d => xScale(new Date(d.data[0])))
         .y0(d => yScale(d[0]))
         .y1(d => yScale(d[1]))
-        .curve(d3.curveBasis)
+        .curve(d3.curveMonotoneX)
 
     let mouseEventRect = mouseEventGroup
         .selectAll("rect")
@@ -64,7 +68,7 @@ function areaUpdate(data, xScale, initial=false){
             heatmapUpdate(wrangledData, xScale)
         })
 
-    let ageArea = ageAreagroup
+    let ageArea = ageAreaGroup
         .selectAll(".areapath")
         .data(series)
         .join("path")
@@ -72,8 +76,10 @@ function areaUpdate(data, xScale, initial=false){
             .attr('stroke', 'white')
             .attr("stroke-dasharray", "2")
             .attr("class", "areapath")
+            .attr("fill-opacity", d => areaHover.includes(d.key) ? 1 : 0.8)
             .on("mouseover", function(event, d){
                 areaSelection = [d.key]
+
                 heatmapUpdate(wrangledData, xScale)
 
                 let hoverDate = sumBy.round(xScale.invert(event.layerX - margin.left))
@@ -99,6 +105,7 @@ function areaUpdate(data, xScale, initial=false){
             .on("mouseout", function(){
 
                 areaSelection = areas
+
                 heatmapUpdate(wrangledData, xScale)
 
                 areachart
@@ -123,6 +130,31 @@ function areaUpdate(data, xScale, initial=false){
             })
             .attr("d", area)
 
+    // high point label
+    let totals = Array.from(d3.rollup(data, v => d3.sum(v, j => areaSelection.includes(j.areaName) ? j[selection] : 0), d => d.startDate))
+    let max = d3.maxIndex(totals, d => d[1])
+    
+    highPointGroup.selectAll('.highline')
+        .data([1])
+        .join('line')
+        .attr('y1', yScale(totals[max][1]))
+        .attr('y2', yScale(totals[max][1]))
+        .attr('x1', xScale(totals[max][0]) - (width / 4))
+        .attr('x2', xScale(totals[max][0]))
+        .attr("stroke-dasharray", "4")
+        .attr("stroke", 'black')
+        .attr("class", "highline")
+
+        highPointGroup.selectAll('text')
+            .data([1])
+            .join('text')
+            .text(`Peak: ${dateOutputFormat(totals[max][0])} - ` + totals[max][1].toLocaleString())
+            .attr("font-family", "sans-serif")               
+            .attr("font-size", "10px")
+            .attr('fill', 'black')
+            .attr('x', xScale(totals[max][0]) - (width / 4) - 10)
+            .attr('y', yScale(totals[max][1])+3)
+            .style("text-anchor", "end")
 
     labels(labelsGroup, xScale, 'grey')
 

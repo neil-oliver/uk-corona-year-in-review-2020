@@ -35,6 +35,7 @@ let data = []
 let wrangledData = []
 let areas = []
 let areaSelection = []
+let areaHover = []
 
 d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 
@@ -48,6 +49,7 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 
     areas = [...new Set(data.map(d => d.areaName))]
     areaSelection = areas
+    areaHover = areas
 
     var areaSelectChange = function(event) {
 

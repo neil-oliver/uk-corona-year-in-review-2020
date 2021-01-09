@@ -36,7 +36,10 @@ function heatmapUpdate(data, xScale, initial=false){
         .attr('width', d => xScale(d.endDate) - xScale(d.startDate))
         .attr("fill", d => colorScale(d[selection]))
         .attr('fill-opacity', d => areaSelection.includes(d.areaName) ? 1 : 0.9)
-        .on("mouseover", function(event, d){
+        .on("mouseover", function(event, d){      
+            areaHover = [d.areaName]
+            areaUpdate(wrangledData, xScale)
+
             tooltip.transition()		
                 .duration(200)		
                 .style("opacity", .9);		
@@ -45,6 +48,9 @@ function heatmapUpdate(data, xScale, initial=false){
                 .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", function(){
+            areaHover = areas
+            areaUpdate(wrangledData, xScale)
+
             tooltip.transition()		
                 .duration(500)		
                 .style("opacity", 0);

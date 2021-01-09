@@ -22,7 +22,7 @@ let sumByLookup = {
 }
 
 let sumBy = d3.utcWeek
-let sumByKey = 'week'
+let sumByKey = 'Week'
 
 
 var dateOutputFormat = d3.timeFormat("%d %B %Y");
