@@ -48,41 +48,12 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
     data = data.filter(d => d.areaName != undefined)
 
     areas = [...new Set(data.map(d => d.areaName))]
-    areaSelection = areas
-    areaHover = areas
-
-    var areaSelectChange = function(event) {
-
-        var checkedValues = document.querySelectorAll('.areaCheckbox:checked');
-        let checkedAreas = []
-        checkedValues.forEach(d => {
-            checkedAreas.push(d.value)
-        });
-        areaSelection = checkedAreas
-
-        areaUpdate(wrangledData, xScale)
-        heatmapUpdate(wrangledData, xScale)
-    };
-
-    areaSelect = d3.select("#area-select-container")
-        .on("change", areaSelectChange);
+    areaSelection = [...areas]
+    areaHover = [...areas]
 
     let colorScale = d3.scaleBand()
         .domain(areas)
         .range([0,1])
-
-    areaSelect.selectAll("input")
-        .data(areas)
-        .enter()
-        .append('label')
-            .text(function(d) { return d; })
-            .style('color', d => d3.interpolateViridis(colorScale(d)))
-        .append("input")
-            .attr("checked", d => areaSelection.includes(d) ? true : false)
-            .attr("type", "checkbox")
-            .attr("value", d => d)
-            .attr("id", function(d,i) { return i; })
-            .attr("class", "areaCheckbox")
 
     xScale.domain(d3.extent(data, d => d.date))
 
@@ -143,9 +114,15 @@ window.addEventListener('resize', _.debounce(resize));
 function resize(){
     console.log('resizing')
     svgWidth = parseInt(d3.select('#vis-container').style('width'), 10)
+    areaSvgHeight = svgWidth * 0.5
+
     d3.selectAll('svg').attr("width", svgWidth)
 
+    d3.selectAll('#areachart').attr("height", areaSvgHeight)
+
     width = svgWidth - margin.left - margin.right
+
+    d3.selectAll('#legend-x-axis').attr("transform", `translate(${(width / 5) * 4},${heatmapHeight+120})`)
 
     xScale.range([0, width])
 

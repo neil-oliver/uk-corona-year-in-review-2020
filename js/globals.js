@@ -1,18 +1,27 @@
 //global variables
 let svgWidth = parseInt(d3.select('#vis-container').style('width'), 10)
 
-// let svgWidth = 1800
-let svgHeight = 800
+let areaSvgHeight = 600
+let heatmapSvgHeight = 350
 
 let margin = {
     left:100,
     right:100,
-    top:200,
+}
+
+let areaMargin = {
+    top:150,
+    bottom:150
+}
+
+let heatmapMargin = {
+    top:5,
     bottom:150
 }
 
 //inner width & height 
-let height = svgHeight - margin.top - margin.bottom
+let areaHeight = areaSvgHeight - areaMargin.top - areaMargin.bottom
+let heatmapHeight = heatmapSvgHeight - heatmapMargin.top - heatmapMargin.bottom
 let width = svgWidth - margin.left - margin.right
 
 let sumByLookup = {

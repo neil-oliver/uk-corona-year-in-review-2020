@@ -1,4 +1,4 @@
-function labels(group, xScale, lineColor='white', labels=true){
+function labels(group, xScale, lineColor='white', Height, labels=true){
 
     let markers_data = [
         {label:'National Lockdown', date:'03/23/2020', desc:'All non-essential businesses & education closed for in person work.'},
@@ -17,7 +17,7 @@ function labels(group, xScale, lineColor='white', labels=true){
         .data(markers_data)
         .join('line')
         .attr('y1', 0)
-        .attr('y2', height)
+        .attr('y2', Height)
         .attr('x1', d => xScale(new Date(d.date)))
         .attr('x2', d => xScale(new Date(d.date)))
         .attr("stroke-dasharray", "4")
