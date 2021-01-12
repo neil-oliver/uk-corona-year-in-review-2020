@@ -1,5 +1,7 @@
-function wrangleData(data, xScale) {
+// summarize data by time period (day / week / month - selectable).
+function wrangleData(data) {
 
+    // histrogram to group data by time period 
     var histogram = d3.bin()
         .value(function(d) { return d.date; })
         .domain(xScale.domain())
@@ -8,9 +10,10 @@ function wrangleData(data, xScale) {
     let sumData = []
 
     for (let x of areas){
-        let temp = data.filter(d => d.areaName == x)
+        // break data into each area before summarizing
+        let filteredByArea = data.filter(d => d.areaName == x)
 
-        let newObj = histogram(temp).map(d => {
+        let newObj = histogram(filteredByArea).map(d => {
             return {
                 areaName: x, 
                 startDate: d.x0, 
@@ -19,35 +22,30 @@ function wrangleData(data, xScale) {
                 cumCasesBySpecimenDate: d3.max(d, j => j.cumCasesBySpecimenDate ? j.cumCasesBySpecimenDate : 0) != undefined ? d3.max(d, j => j.cumCasesBySpecimenDate ? j.cumCasesBySpecimenDate : 0) : 0, 
                 newDeaths28DaysByPublishDate: d3.sum(d, j => j.newDeaths28DaysByPublishDate ? j.newDeaths28DaysByPublishDate : 0) != undefined ? d3.sum(d, j => j.newDeaths28DaysByPublishDate ? j.newDeaths28DaysByPublishDate : 0) : 0,
                 cumDeaths28DaysByPublishDate: d3.max(d, j => j.cumDeaths28DaysByPublishDate ? j.cumDeaths28DaysByPublishDate : 0) != undefined ? d3.max(d, j => j.cumDeaths28DaysByPublishDate ? j.cumDeaths28DaysByPublishDate : 0) : 0,
+                // age demongraphic information, not currently used. Only available for regional data (not local authority).
                 newCasesBySpecimenDateAgeDemographics: keys.map((j,i) => d3.sum(d, k => k.newCasesBySpecimenDateAgeDemographics[i] ? k.newCasesBySpecimenDateAgeDemographics[i].cases : 0))
             }
         })
+        // concat all area summaries into a single file
         sumData = sumData.concat(newObj)
     }
 
+    // return summarised data
     return sumData
 }
 
-let xScale = d3.scaleUtc()
-    .range([0, width])
-
-let data = []
-let wrangledData = []
-let areas = []
-let areaSelection = []
-let areaHover = []
-
+// load data
 d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 
-    data = d
+    rawData = d
 
-    data.sort((a,b) => a.startDate > b.startDate ? 1 : -1)
+    rawData.sort((a,b) => a.startDate > b.startDate ? 1 : -1)
 
-    data.forEach(d => d.date = new Date(d.date))
+    rawData.forEach(d => d.date = new Date(d.date))
 
-    data = data.filter(d => d.areaName != undefined)
+    rawData = rawData.filter(d => d.areaName != undefined)
 
-    areas = [...new Set(data.map(d => d.areaName))]
+    areas = [...new Set(rawData.map(d => d.areaName))]
     areaSelection = [...areas]
     areaHover = [...areas]
 
@@ -55,15 +53,18 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
         .domain(areas)
         .range([0,1])
 
-    xScale.domain(d3.extent(data, d => d.date))
+    xScale.domain(d3.extent(rawData, d => d.date))
 
-    wrangledData = wrangleData(data, xScale)
+    data = wrangleData(rawData)
 
+    console.log('RAW DATA')
+    console.log(rawData)
+
+    console.log('WRANGLED DATA')
     console.log(data)
-    console.log(wrangledData)
 
-    areaUpdate(wrangledData, xScale, true)
-    heatmapUpdate(wrangledData, xScale, true)
+    areaUpdate(data, xScale, true)
+    heatmapUpdate(data, xScale, true)
 
 })
 
@@ -71,8 +72,8 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
 var metricDropdownChange = function() {
     selection = d3.select(this).property('value'),
 
-    areaUpdate(wrangledData, xScale)
-    heatmapUpdate(wrangledData, xScale)
+    areaUpdate(data, xScale)
+    heatmapUpdate(data, xScale)
 };
 
 var metricDropdown = d3.select("#metric-dropdown-container")
@@ -92,9 +93,9 @@ var periodDropdownChange = function() {
     sumBy = sumByLookup[sumByKey]
     console.log('updating sum by to ' + sumBy)
 
-    wrangledData = wrangleData(data, xScale)
-    areaUpdate(wrangledData, xScale)
-    heatmapUpdate(wrangledData, xScale)
+    data = wrangleData(rawData)
+    areaUpdate(data, xScale)
+    heatmapUpdate(data, xScale)
 };
 
 var periodDropdown = d3.select("#period-dropdown-container")
@@ -108,6 +109,7 @@ periodDropdown.selectAll("option")
     .text(function (d) {
         return d.charAt(0).toUpperCase() + d.slice(1)
     });
+
 
 window.addEventListener('resize', _.debounce(resize));
 
@@ -126,8 +128,8 @@ function resize(){
 
     xScale.range([0, width])
 
-    areaUpdate(wrangledData, xScale)
-    heatmapUpdate(wrangledData, xScale)
+    areaUpdate(data, xScale)
+    heatmapUpdate(data, xScale)
 }
 
 

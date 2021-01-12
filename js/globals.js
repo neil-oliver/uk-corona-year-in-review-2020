@@ -33,6 +33,14 @@ let sumByLookup = {
 let sumBy = d3.utcWeek
 let sumByKey = 'Week'
 
+let xScale = d3.scaleUtc()
+    .range([0, width])
+
+let rawData = []
+let data = []
+let areas = []
+let areaSelection = []
+let areaHover = []
 
 var dateOutputFormat = d3.timeFormat("%d %B %Y");
 

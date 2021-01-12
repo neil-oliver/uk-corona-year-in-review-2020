@@ -1,46 +1,46 @@
-let heatmap = d3.select('#heatmap')
+/////////////////////////////////////
+//////////// Setup SVG //////////////
+/////////////////////////////////////
+const heatmap = d3.select('#heatmap')
     .append('svg')
     .attr('height', heatmapSvgHeight)
     .attr('width', svgWidth)
     .append('g')
     .attr("transform", "translate(" + margin.left + "," + heatmapMargin.top + ")");
 
-//add svg group to append axis
-let heatmapXAxisGroup = heatmap.append("g")
+
+/////////////////////////////////////
+//////////// Add Groups /////////////
+/////////////////////////////////////
+const heatmapXAxisGroup = heatmap.append("g")
     .attr("transform", `translate(0,${heatmapHeight})`)
     .attr("id", "x-axis")
 
-let heatmapYAxisGroup = heatmap.append("g")
+const heatmapYAxisGroup = heatmap.append("g")
     .attr("id", "y-axis")
 
-let heatmapLegendGroup = heatmap.append("g")
+const heatmapLegendGroup = heatmap.append("g")
     .attr("transform", `translate(${(width / 5) * 4},${heatmapHeight+120})`)
     .attr("id", "legend-x-axis")
 
-// load in data
-function heatmapUpdate(data, xScale, initial=false){
 
-    // scales
-    let yScale = d3.scaleBand()
-        .domain(d3.map(data, d => d.areaName))
-        .range([heatmapHeight,0])
-        // .paddingInner(0.01)
-        // .paddingOuter(0.01)
+/////////////////////////////////////
+///////// Update Function ///////////
+/////////////////////////////////////
+function heatmapUpdate(data){
 
-    // Log Scale
-    const logScale = d3.scaleSymlog().domain(d3.extent(data, d => d[selection]))
-    let colorScale;
+    const legendSize = width / 5
 
-    let log = false
+    /////////////////////////////////////
+    ////////////// Scales ///////////////
+    /////////////////////////////////////
+    const yScale = d3.scaleBand().domain(d3.map(rawData, d => d.areaName)).range([heatmapHeight,0])
+    const colorScale = d3.scaleSequential().domain(d3.extent(data, d => d[selection])).interpolator(d3.interpolateViridis)
+    const legendScale = d3.scaleLinear().domain([0,legendSize]).range(d3.extent(data, d => d[selection]))
 
-    if (log == true){
-        colorScale = d3.scaleSequential(d => d3.interpolateViridis(logScale(d)))
-    } else {
-        colorScale = d3.scaleSequential()
-            .domain(d3.extent(data, d => d[selection]))
-            .interpolator(d3.interpolateViridis)
-    }
-
+    /////////////////////////////////////
+    //////////// Add Squres /////////////
+    /////////////////////////////////////
     heatmap.selectAll('rect')
         .data(data)
         .join('rect')
@@ -53,18 +53,20 @@ function heatmapUpdate(data, xScale, initial=false){
         .attr("stroke-opacity", 0.9)
         .attr("stroke-width", 0)
         .attr('fill-opacity', d => areaHover.includes(d.areaName) ? 1 : 0.9)
-        .on("mouseover", function(event, d){      
+        .on("mouseover", function(event, d){  
+            // update hover opacity    
             areaHover = [d.areaName]
-            areaUpdate(wrangledData, xScale)
-            heatmapUpdate(wrangledData, xScale)
+            areaUpdate(data, xScale)
+            heatmapUpdate(data, xScale)
 
+            //adjust size of squares to show stroke correctly
             d3.select(this).attr("stroke-width", 1)
-            .attr('y', d => yScale(d.areaName) + 1)
-            .attr('height', yScale.bandwidth() - 2)
-            .attr('x', d => xScale(d.startDate) + 1)
-            .attr('width', d => xScale(d.endDate) - xScale(d.startDate) - 2)
+                .attr('y', d => yScale(d.areaName) + 1)
+                .attr('height', yScale.bandwidth() - 2)
+                .attr('x', d => xScale(d.startDate) + 1)
+                .attr('width', d => xScale(d.endDate) - xScale(d.startDate) - 2)
 
-
+            // show and add information to tooltip
             tooltip.transition()		
                 .duration(200)		
                 .style("opacity", .9);		
@@ -73,48 +75,51 @@ function heatmapUpdate(data, xScale, initial=false){
                 .style("top", (event.pageY - 28) + "px");
         })
         .on("mouseout", function(){
+            // update hover opacity    
             areaHover = areas
-            areaUpdate(wrangledData, xScale)
-            heatmapUpdate(wrangledData, xScale)
+            areaUpdate(data, xScale)
+            heatmapUpdate(data, xScale)
 
+            // reset stroke width
             d3.select(this).attr("stroke-width", 0)
 
+            // hide tooltip
             tooltip.transition()		
                 .duration(500)		
                 .style("opacity", 0);
         })
 
+
+    /////////////////////////////////////
+    ////////////// Labels ///////////////
+    /////////////////////////////////////
     labels(heatmap, xScale, 'white', heatmapHeight, false)
 
 
-    // legend
-    let legendSize = width / 5
-    let legendData = new Array(Math.floor(legendSize)).fill(1)
-    let legendXstart = (width / 5) * 4
-    let legendYstart = heatmapHeight
-    let legendHeight = 30
+    /////////////////////////////////////
+    ////////////// Legend ///////////////
+    /////////////////////////////////////
+    const legendData = new Array(Math.floor(legendSize)).fill(1)
 
-    let legendScale = d3.scaleLinear()
-        .domain([0,legendSize])
-        .range(d3.extent(data, d => d[selection]))
-
-        heatmapLegendGroup.selectAll('.colorlegend')
+    heatmapLegendGroup.selectAll('.colorlegend')
         .data(legendData)
         .join('line')
-        .attr('y1', -legendHeight)
+        .attr('y1', -30) // legend height
         .attr('y2', 0)
         .attr('x1', (d,i) => i)
         .attr('x2', (d,i) => i)
         .attr("stroke", (d,i) => colorScale(legendScale(i)))
         .attr("class", "colorlegend")
 
-    let legendAxisScale = d3.scaleLinear()
+    const legendAxisScale = d3.scaleLinear()
         .domain(d3.extent(data, d => d[selection]))
         .range([0,legendSize])
 
     heatmapLegendGroup.call(d3.axisBottom(legendAxisScale).ticks(5))
 
-    //append axis
+    /////////////////////////////////////
+    //////////////// Axis ///////////////
+    /////////////////////////////////////   
     heatmapXAxisGroup
         .call(d3.axisBottom(xScale))
         .selectAll("text")
@@ -124,7 +129,6 @@ function heatmapUpdate(data, xScale, initial=false){
         .attr("transform", "rotate(90)")
         .style("text-anchor", "start");
 
-    heatmapYAxisGroup
-        .call(d3.axisLeft(yScale))
+    heatmapYAxisGroup.call(d3.axisLeft(yScale))
 
 };
