@@ -65,7 +65,6 @@ function areaUpdate(data){
         .attr("fill", "rgb(0,0,0,0)")
         .on("click", function(event, d){
             areaSelection = [...areas]
-
             areaUpdate(data)
             heatmapUpdate(data)
         })
@@ -87,7 +86,12 @@ function areaUpdate(data){
         .keys(areas)
         .value((d,key) => areaSelection.includes(key) ? d[1].get(key)[0][selection] : 0)
         .order(d3.stackOrderNone)
-        (values)
+        (new Map(
+            [...values]
+            .filter(([d, key]) => d <= new Date(filter_date) )
+        ))
+
+    console.log(values)
     
     // add areas
     ageAreaGroup

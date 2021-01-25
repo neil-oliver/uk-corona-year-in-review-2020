@@ -35,11 +35,14 @@ function heatmapUpdate(data){
     ////////////// Scales ///////////////
     /////////////////////////////////////
     const yScale = d3.scaleBand().domain(d3.map(rawData, d => d.areaName)).range([heatmapHeight,0])
-    const colorScale = d3.scaleSequential().domain(d3.extent(data, d => d[selection])).interpolator(d3.interpolateViridis)
+    const step = d3.scaleLinear().domain([0, 9]).range(d3.extent(data, d => d[selection]));
+    const colors = ['rgba(0,0,0,0)', ...d3.schemeYlOrRd[9]]
+    const colorDomain = colors.map((d,i) => step(i))
+    const colorScale = d3.scaleLinear().domain(colorDomain).range(colors)
     const legendScale = d3.scaleLinear().domain([0,legendSize]).range(d3.extent(data, d => d[selection]))
 
     /////////////////////////////////////
-    //////////// Add Squres /////////////
+    //////////// Add Squares ////////////
     /////////////////////////////////////
     heatmap.selectAll('rect')
         .data(data)
@@ -48,7 +51,7 @@ function heatmapUpdate(data){
         .attr('height', yScale.bandwidth())
         .attr('x', d => xScale(d.startDate))
         .attr('width', d => xScale(d.endDate) - xScale(d.startDate))
-        .attr("fill", d => colorScale(d[selection]))
+        .attr("fill", d => d.startDate < new Date(filter_date) ? colorScale(d[selection]) : 'rgba(0,0,0,0)')
         .attr("stroke", d => colorScale(d[selection]))
         .attr("stroke-opacity", 0.9)
         .attr("stroke-width", 0)

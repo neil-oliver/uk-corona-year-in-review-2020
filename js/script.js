@@ -22,7 +22,7 @@ function wrangleData(data) {
                 cumCasesBySpecimenDate: d3.max(d, j => j.cumCasesBySpecimenDate ? j.cumCasesBySpecimenDate : 0) != undefined ? d3.max(d, j => j.cumCasesBySpecimenDate ? j.cumCasesBySpecimenDate : 0) : 0, 
                 newDeaths28DaysByPublishDate: d3.sum(d, j => j.newDeaths28DaysByPublishDate ? j.newDeaths28DaysByPublishDate : 0) != undefined ? d3.sum(d, j => j.newDeaths28DaysByPublishDate ? j.newDeaths28DaysByPublishDate : 0) : 0,
                 cumDeaths28DaysByPublishDate: d3.max(d, j => j.cumDeaths28DaysByPublishDate ? j.cumDeaths28DaysByPublishDate : 0) != undefined ? d3.max(d, j => j.cumDeaths28DaysByPublishDate ? j.cumDeaths28DaysByPublishDate : 0) : 0,
-                // age demongraphic information, not currently used. Only available for regional data (not local authority).
+                // age demographic information, not currently used. Only available for regional data (not local authority).
                 newCasesBySpecimenDateAgeDemographics: keys.map((j,i) => d3.sum(d, k => k.newCasesBySpecimenDateAgeDemographics[i] ? k.newCasesBySpecimenDateAgeDemographics[i].cases : 0))
             }
         })
@@ -33,6 +33,15 @@ function wrangleData(data) {
     // return summarised data
     return sumData
 }
+
+//load in sections
+var steps = d3.select('#steps')
+	.selectAll('div')
+    .data(markers_data)
+    .join('div')
+		.attr('class', 'step')
+        .attr('data-step', d => d.date)
+        .text(d => d.desc)
 
 // load data
 d3.json('./js/uk_coronavirus_data_region.json').then(d => {
@@ -67,6 +76,38 @@ d3.json('./js/uk_coronavirus_data_region.json').then(d => {
     heatmapUpdate(data, xScale, true)
 
 })
+
+// 1. initialize the scrollama
+var scroller = scrollama();
+
+function init() {
+
+  scroller
+    .setup({
+      step: "#scrolly article .step",
+      offset: 0.3,
+    //   debug: true
+    })
+    .onStepEnter(handleStepEnter);
+
+}
+
+// 2. scrollama event handlers
+function handleStepEnter(response) {
+  
+  // response = { element, direction, index }
+//   console.log(response);
+
+  // get the data step attribute which has our "stacked, grouped, or percent value"
+  filter_date  = response.element.getAttribute("data-step")
+  areaUpdate(data, xScale)
+  heatmapUpdate(data, xScale)
+
+}
+
+// kick things off
+init();
+
 
 // Handler for dropdown value change
 var metricDropdownChange = function() {
